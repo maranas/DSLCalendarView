@@ -91,9 +91,13 @@
     if (!self.superview) {
         return;
     }
-    _dayViewHeight = DEFAULT_DAY_VIEW_HEIGHT;
     CGFloat maxHeight = self.superview.bounds.size.height - self.monthSelectorView.bounds.size.height;
     CGFloat expectedHeight = self.monthContainerView.bounds.size.height;
+    if (fabsf(maxHeight - expectedHeight) < 1)
+    {
+        return;
+    }
+    _dayViewHeight = DEFAULT_DAY_VIEW_HEIGHT;
     if (expectedHeight > maxHeight) {
         // resize the month container relative to the superview if it is too big
         _dayViewHeight *= (maxHeight/expectedHeight);
