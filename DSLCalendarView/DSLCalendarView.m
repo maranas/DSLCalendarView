@@ -37,6 +37,7 @@
 #import "DSLCalendarView.h"
 #import "DSLCalendarDayView.h"
 
+#define DEFAULT_DAY_VIEW_HEIGHT 44.0
 
 @interface DSLCalendarView ()
 
@@ -85,9 +86,32 @@
     return self;
 }
 
+- (void) layoutSubviews {
+    [super layoutSubviews];
+    if (!self.superview) {
+        return;
+    }
+    _dayViewHeight = DEFAULT_DAY_VIEW_HEIGHT;
+    CGFloat maxHeight = self.superview.bounds.size.height - self.monthSelectorView.bounds.size.height;
+    CGFloat expectedHeight = self.monthContainerView.bounds.size.height;
+    if (expectedHeight > maxHeight) {
+        // resize the month container relative to the superview if it is too big
+        _dayViewHeight *= (maxHeight/expectedHeight);
+    }
+    // Month views are contained in a content view inside a container view - like a scroll view, but not a scroll view so we can have proper control over animations
+    CGRect frame = self.bounds;
+    frame.origin.x = 0;
+    frame.origin.y = CGRectGetMaxY(self.monthSelectorView.frame);
+    frame.size.height -= frame.origin.y;
+    self.monthContainerView.frame = frame;
+    self.monthContainerViewContentView.frame = self.monthContainerView.bounds;
+
+    [self.monthViews removeAllObjects];
+    [self updateMonthLabelMonth:_visibleMonth];
+    [self positionViewsForMonth:_visibleMonth fromMonth:_visibleMonth animated:NO];
+}
+
 - (void)commonInit {
-    _dayViewHeight = 44;
-    
     _visibleMonth = [[NSCalendar currentCalendar] components:NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit | NSWeekdayCalendarUnit | NSCalendarCalendarUnit fromDate:[NSDate date]];
     _visibleMonth.day = 1;
     
